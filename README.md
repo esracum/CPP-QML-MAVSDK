@@ -7,73 +7,97 @@ Bu rehber, **Hezarfen İHA Takımı** yazılım geliştirme süreçleri için Ub
 ## 🛠 1. Sistem Bağımlılıkları
 Sistemdeki temel derleme araçlarını ve kütüphaneleri kurmak için terminalde aşağıdaki komutları çalıştırın:
 
+```bash
+# Sistem paket listesini günceller
 sudo apt-get update
+# Derleme araçlarını, CMake ve Git'i yükler
 sudo apt-get install build-essential cmake git -y
+```
 
 ---
 
 ## ✈️ 2. PX4 Autopilot Kurulumu (Drone Beyni)
-Drone'un uçuş algoritmalarını ve Gazebo simülatör altyapısını kurun. Bu işlem alt modüller nedeniyle internet hızınıza bağlı olarak zaman alabilir:
+Drone'un uçuş algoritmalarını ve Gazebo simülatör altyapısını kurun. Bu işlem alt modüller nedeniyle zaman alabilir:
 
-# Ana dizine gidin ve kaynak kodu submodülleriyle birlikte klonlayın
+```bash
+# Ana dizine gider
 cd ~
-git clone [https://github.com/PX4/PX4-Autopilot.git](https://github.com/PX4/PX4-Autopilot.git) --recursive
+# Kaynak kodlarını alt modülleriyle birlikte klonlar
+git clone https://github.com/PX4/PX4-Autopilot.git --recursive
 
-# Bağımlılıkları kuran kurulum scriptini çalıştırın
+# PX4 bağımlılıklarını ve Gazebo'yu kuran scripti çalıştırır
 cd ~/PX4-Autopilot
 bash ./Tools/setup/ubuntu.sh
+```
 
-> **⚠️ Önemli:** Kurulum bittikten sonra bilgisayarı yeniden başlatmanız (reboot) önerilir.
-> **Not:** Eğer derleme hatası (jsonschema) alırsanız: pip3 install --user jsonschema komutunu kullanın.
+> **⚠️ Önemli:** Kurulum bittikten sonra bilgisayarı yeniden başlatmanız önerilir.
+> **Not:** Eğer derleme hatası (jsonschema) alırsanız şu komutu kullanın: 
+```bash
+# Eksik Python paketini yükler
+pip3 install --user jsonschema
+```
 
 ---
 
 ## 📦 3. MAVSDK-C++ Kütüphane Kurulumu
 C++ üzerinden drone'a komut gönderebilmek için gerekli SDK paketini yükleyin:
 
-# İndirdiğiniz .deb paketini kurun (Versiyonun uygunluğunu kontrol edin)
+```bash
+# İndirilen .deb paketini yükler
 sudo dpkg -i libmavsdk-dev_3.0.0_ubuntu24.04_amd64.deb
 
-# Eksik bağımlılıkları onarın
+# Bağımlılık hatalarını onarır
 sudo apt-get install -f -y
+```
 
 ---
 
 ## 💻 4. Örnek Projenin Derlenmesi
 MAVSDK örnek kodlarını kullanarak otonom uçuş projesini derleyin:
 
-# Örnekleri klonlayın
-git clone [https://github.com/mavlink/MAVSDK-C-Plus-Plus-Examples.git](https://github.com/mavlink/MAVSDK-C-Plus-Plus-Examples.git)
+```bash
+# Örnekleri klonlar
+git clone https://github.com/mavlink/MAVSDK-C-Plus-Plus-Examples.git
+# İlgili dizine girer
 cd MAVSDK-C-Plus-Plus-Examples/takeoff_and_land
 
-# Build klasörü oluşturun ve CMake ile derleyin
+# Build klasörü oluşturur ve derleme işlemini başlatır
 mkdir build && cd build
 cmake ..
 make
+```
 
 ---
 
 ## 🚀 5. Simülasyonun Başlatılması (SITL)
 
-
-
 Simülasyonun çalışması için iki ayrı terminal kullanılması gerekmektedir.
 
 ### Adım 1: Simülatörü Başlatın (Terminal 1)
+```bash
+# PX4 dizinine gider
 cd ~/PX4-Autopilot
-# Yeni nesil Gazebo (Ubuntu 22.04+ / Gazebo Sim v8) için:
+# Yeni nesil Gazebo ve x500 modeli ile simülasyonu başlatır
 make px4_sitl gz_x500
+```
 
 ### Adım 2: Otonom Görevi Çalıştırın (Terminal 2)
+```bash
+# Derlenen dosyanın dizinine gider
 cd ~/MAVSDK-C-Plus-Plus-Examples/takeoff_and_land/build
+# UDP portu üzerinden drone'a bağlanır ve otonom kodu çalıştırır
 ./takeoff_and_land udp://:14540
+```
 
 ---
 
 ## 🏗 Sistem Mimarisi
-- **PX4 SITL:** Drone'un beyni; tüm uçuş algoritmalarını simüle eder.
-- **Gazebo Sim:** Fizik motoru; drone gövdesini ve çevreyi 3D modeller.
-- **MAVSDK-C++:** Geliştirilen otonom görevleri MAVLink protokolü ile drone'a iletir.
+| Bileşen | Görev |
+| :--- | :--- |
+| **PX4 SITL** | Drone'un beyni; tüm uçuş algoritmalarını simüle eder. |
+| **Gazebo Sim** | Fizik motoru; drone gövdesini ve çevreyi 3D modeller. |
+| **MAVSDK-C++** | Otonom görevleri MAVLink üzerinden drone'a iletir. |
 
 ---
 **Hazırlayan:** Esra Cüm  
+**Kurum:** Hezarfen İHA Takımı
